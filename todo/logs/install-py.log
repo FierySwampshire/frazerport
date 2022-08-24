@@ -1,0 +1,10 @@
+~/python$ curl -o Python-3.10.6.tar.xz https://www.python.org/ftp/python/3.10.6/Python-3.10.6.tar.xz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 18.6M  100 18.6M    0     0   109M      0 --:--:-- --:--:-- --:--:--  109M
+~/python$ ls
+Python-3.10.6.tar.xz
+~/python$ tar xf Python-3.10.6.tar.xz 
+~/python$ ls
+Python-3.10.6  Python-3.10.6.tar.xz
+~/python$ 
