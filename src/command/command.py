@@ -18,20 +18,56 @@ intents.members = True
 intents.message_content = True
 intents.presences = True
 
-bot = commands.Bot(command_prefix=')', description=description, intents=intents, owner_id=get_owner_id())
+
+class Frazerport(commands.Bot):
+    async def on_ready(self):
+        await self.wait_until_ready()
+        if not self.synced:
+            guild_id = 832176801417658388
+            await self.tree.sync()  # guild sync, remove id for global sync
+            self.synced = True
+        print(f'Logged in as {self.user} (ID: {bot.user.id})')
+        print('------')
+        # print(bot)
+        # print(dir(bot))
+        # print(bot.intents)
+        print('setting up slash commands')
+        make_slash_commands()
+        print('------')
+        await self.change_presence(activity=discord.Game(name='Frazerport'))
+
+bot = Frazerport(command_prefix=')', description=description, intents=intents, owner_id=get_owner_id())
 tree = bot.tree
 # slash commands
 
-@tree.command(name='test', description='testing')
-async def self(interaction: Interaction):
-    await interaction.response.send_message(f"Greetings! I was made by DayDay!")
-
 
 time_commands = {}
-
-def make_time_commands():
+other_commands = {}
+def make_slash_commands():
     for style, desc in formatsExplaination.items():
         time_commands[style] = make_dttime_command(tree, style, desc)
+    @tree.command(name='test', description='testing')
+    async def testme(interaction: Interaction):
+        await interaction.response.send_message(f"Greetings! I was made by DayDay!")
+    @tree.command(name='eval', description='evaluates a mathematical expression')
+    async def eval_(interaction: Interaction):
+        await interaction.response.send_message(f"{eval(interaction.arguments)}")
+    @tree.command(name='roll', description='rolls a dice')
+    async def roll(interaction: Interaction):
+        await interaction.response.send_message(f"{random.randint(1, 6)}")
+    @tree.command(name='ping', description='pong')
+    async def ping(interaction: Interaction):
+        await interaction.response.send_message(f"pong")
+    # @tree.command(name='members', description='lists all members')
+    # async def members(interaction: Interaction):
+    #     await interaction.response.send_message(f"{[member(id=i.id, name=i.name, discriminator=i.discriminator, bot=i.bot, nick=i.nick) for i in interaction.guild.members]}")
+    # @tree.command(name='help', description='lists all commands')
+    # async def guild(interaction: Interaction):
+    #     await interaction.response.send_message(f"{[f'{i.name} - {i.description}' for i in interaction.tree.commands]}")
+    other_commands[testme.name] = testme
+    other_commands[eval_.name] = eval_
+    other_commands[roll.name] = roll
+    other_commands[ping.name] = ping
 
 
 def make_dttime_command(tree: CommandTree, style, desc):
@@ -52,8 +88,6 @@ async def on_ready():
     # print(dir(bot))
     # print(bot.intents)
     print('setting up slash commands')
-    make_time_commands()
-
 
 
 @bot.command()
