@@ -1,16 +1,16 @@
-# This example requires the 'members' and 'message_content' privileged intents to function.
 import collections
 from typing import List
-from src.creds import get_secret_key
+from src.creds import get_owner_id
 import discord
 from discord.ext import commands
 import random
 from discord.ext.commands.context import Context
 from src.eval.evaluate import Evaluator
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-
-There are a number of utility commands being showcased here.'''
+from src.time.utils import time_tag_builder, timestamp, formatsExplaination
+from discord.app_commands import CommandTree
+from discord import Interaction
+# bot setup
+description = '''Utility bot for Frazerport.'''
 
 eval = Evaluator()
 intents = discord.Intents.all()
@@ -18,21 +18,46 @@ intents.members = True
 intents.message_content = True
 intents.presences = True
 
-bot = commands.Bot(command_prefix=')', description=description, intents=intents)
+bot = commands.Bot(command_prefix=')', description=description, intents=intents, owner_id=get_owner_id())
+tree = bot.tree
+# slash commands
+
+@tree.command(name='test', description='testing')
+async def self(interaction: Interaction):
+    await interaction.response.send_message(f"Greetings! I was made by DayDay!")
+
+
+time_commands = {}
+
+def make_time_commands():
+    for style, desc in formatsExplaination.items():
+        time_commands[style] = make_dttime_command(tree, style, desc)
+
+
+def make_dttime_command(tree: CommandTree, style, desc):
+    print(style, desc)
+    @tree.command(name=desc.replace(' ', '_'), description=desc)
+    async def self(interaction: Interaction):
+        await interaction.response.send_message(f"{time_tag_builder(t='t', timestamp=timestamp(), style=style)}")
+    return self
+
+# bot commands
 
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
-    print(bot)
-    print(dir(bot))
-    print(bot.intents)
+    # print(bot)
+    # print(dir(bot))
+    # print(bot.intents)
+    print('setting up slash commands')
+    make_time_commands()
+
 
 
 @bot.command()
 async def role(ctx: Context):
-    log_guild(ctx)
     all_roles = ctx.guild._roles
     author_roles: List[discord.Role] = [all_roles.get(role, None) for role in ctx.author._roles if role in all_roles]
     await ctx.send(f'your roles are : {[i.name for i in author_roles]}')
